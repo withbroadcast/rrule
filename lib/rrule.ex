@@ -1,18 +1,11 @@
 defmodule RRule do
-  @moduledoc """
-  Documentation for `Rrule`.
-  """
+  alias RRule.RuleSet
 
-  @doc """
-  Hello world.
+  def next_occurrence(ruleset, datetime) do
+    RuleSet.next_occurrence(ruleset, datetime)
+  end
 
-  ## Examples
-
-      iex> Rrule.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def next_occurrences(ruleset, datetime, count) do
+    RuleSet.next_occurrences(ruleset, datetime, count)
   end
 end
