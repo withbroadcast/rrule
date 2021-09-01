@@ -1,6 +1,8 @@
 # Rrule
 
-**TODO: Add description**
+_THIS IS PRE ALPHA SOFTWARE. DO NOT USE IT, IT WILL NOT WORK._
+
+Elixir implementation of RRULEs from RFC5545 and RFC2445.
 
 ## Installation
 
@@ -18,4 +20,3 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/rrule](https://hexdocs.pm/rrule).
-
