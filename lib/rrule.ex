@@ -150,10 +150,10 @@ defmodule RRule do
   """
   def next(rule, opts \\ [])
 
-  def next(rule, opts) when is_binary(rule) do
-    rule
-    |> RRule.Parser.ICal.parse()
-    |> next(opts)
+  def next(str, opts) when is_binary(str) do
+    with {:ok, rule} <- RRule.Parser.ICal.parse(str) do
+      next(rule, opts)
+    end
   end
 
   def next(%Rule{} = rule, opts) do
