@@ -50,11 +50,22 @@ defmodule RRule.Rule do
     :byminute,
     :bysecond,
     interval: 1,
-    wkst: :monday
+    wkst: :monday,
+    errors: %{}
   ]
 
   @spec new(options()) :: t()
   def new(opts \\ []), do: struct(__MODULE__, opts)
+
+  @spec add_error(t(), atom(), String.t() | atom()) :: t()
+  def add_error(rule, key, value) do
+    # Probably a cleaner way to do this...
+    errors = rule.errors
+    errors_for_key = Map.get(errors, key, [])
+    new_errors_for_key = [value | errors_for_key]
+
+    %{rule | errors: Map.put(errors, key, new_errors_for_key)}
+  end
 
   def first_occurrence(rule, _opts \\ []), do: rule.dtstart
 

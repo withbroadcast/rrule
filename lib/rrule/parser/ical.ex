@@ -1,18 +1,18 @@
 defmodule RRule.Parser.ICal do
-  alias RRule.{Rule, RuleSet}
+  alias RRule.Rule
 
   @time_regex ~r/^:?;?(?:TZID=(.+?):)?(.*?)(Z)?$/
   @datetime_format "{YYYY}{0M}{0D}T{h24}{m}{s}"
   # @time_format "{h24}{m}{s}"
 
-  @spec parse(String.t()) :: {:ok, RuleSet.t()} | {:error, term()}
+  @spec parse(String.t()) :: {:ok, Rule.t()} | {:error, term()}
   def parse(str) when is_binary(str) do
     ruleset =
       str
       |> String.trim()
       |> String.split("\n")
       |> Enum.map(&String.trim/1)
-      |> Enum.reduce(%RuleSet{}, &parse_line/2)
+      |> Enum.reduce(%Rule{}, &parse_line/2)
 
     case ruleset.errors do
       %{} -> {:ok, ruleset}
@@ -22,55 +22,54 @@ defmodule RRule.Parser.ICal do
 
   defp parse_line(line, rule_set)
 
-  defp parse_line("DTSTART" <> time_string, ruleset),
-    do: parse_dtstart(time_string, ruleset)
+  defp parse_line("DTSTART" <> time_string, rule),
+    do: parse_dtstart(time_string, rule)
 
-  defp parse_line("DTEND" <> time_string, ruleset),
-    do: parse_dtend(time_string, ruleset)
+  defp parse_line("DTEND" <> time_string, rule),
+    do: parse_dtend(time_string, rule)
 
-  defp parse_line("RRULE:" <> rrule_string, ruleset),
-    do: parse_rrule(rrule_string, ruleset)
+  defp parse_line("RRULE:" <> rrule_string, rule),
+    do: parse_rrule(rrule_string, rule)
 
-  defp parse_line("RDATE" <> time_string, ruleset),
-    do: parse_rdate(time_string, ruleset)
+  defp parse_line("RDATE" <> time_string, rule),
+    do: parse_rdate(time_string, rule)
 
-  defp parse_line("EXDATE" <> time_string, ruleset),
-    do: parse_exdate(time_string, ruleset)
+  defp parse_line("EXDATE" <> time_string, rule),
+    do: parse_exdate(time_string, rule)
 
   defp parse_line(_, _), do: {:error, :unknown_option}
 
   ## DTSTART
 
-  defp parse_dtstart(time_string, ruleset) do
+  defp parse_dtstart(time_string, rule) do
     case parse_datetime(time_string) do
       {:ok, dt} ->
-        RuleSet.put_dtstart(ruleset, dt)
+        %{rule | dtstart: dt}
 
       {:error, reason} ->
-        RuleSet.add_error(ruleset, :dtstart, reason)
+        Rule.add_error(rule, :dtstart, reason)
     end
   end
 
   ## DTEND
 
-  defp parse_dtend(_time_string, ruleset) do
-    ruleset
+  defp parse_dtend(_time_string, rule) do
+    rule
   end
 
   ## RRULE
 
-  defp parse_rrule(rrule_string, ruleset) do
+  defp parse_rrule(rrule_string, rule) do
     case parse_rrule_options_string(rrule_string) do
       {:error, reason} ->
-        RuleSet.add_error(ruleset, :rrule, reason)
+        Rule.add_error(rule, :rrule, reason)
 
       {:ok, opts} ->
-        rrule = Rule.new(opts)
-        RuleSet.add_rrule(ruleset, rrule)
+        %{Rule.new(opts) | dtstart: rule.dtstart}
     end
   end
 
-  @spec parse_rrule_options_string(String.t()) :: {:ok, RRule.t()} | {:error, term()}
+  @spec parse_rrule_options_string(String.t()) :: {:ok, Rule.t()} | {:error, term()}
   defp parse_rrule_options_string(options_string) do
     options_string
     |> String.split(";")
@@ -412,14 +411,14 @@ defmodule RRule.Parser.ICal do
 
   ## RDATE
 
-  defp parse_rdate(_time_string, ruleset) do
-    ruleset
+  defp parse_rdate(_time_string, rule) do
+    rule
   end
 
   ## EXDATE
 
-  defp parse_exdate(_time_string, ruleset) do
-    ruleset
+  defp parse_exdate(_time_string, rule) do
+    rule
   end
 
   ## Helpers
